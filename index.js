@@ -10,7 +10,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded( {extended: true} ));
 app.use(express.json());
-app.use(express.static(path.resolve(__dirname, '../grade/build')));
+// app.use(express.static(path.resolve(__dirname, '../grade/build')));
 app.use(cors());
 
 const db = mysql.createConnection({
@@ -36,7 +36,6 @@ app.post('/api/createAccount', (req, res) => {
 
     const sqlUserInsert = "INSERT IGNORE INTO Users (userName, userEmail) VALUES (?, ?)";
     db.query(sqlUserInsert, [name, email], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -51,7 +50,6 @@ app.post("/api/createYear", (req, res) => {
     const sqlHaveSemInsert = "INSERT IGNORE INTO userHaveSem (userName, semID) VALUES (?, ?)";
 
     db.query(sqlHaveSemInsert, [name, semID], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -67,7 +65,6 @@ app.delete("/api/deleteYear/:userName/:year/:session/:semester", (req, res) => {
     const sqlHaveSemDelete = "DELETE FROM userHaveSem WHERE userName = (?) AND semID = (?)";
 
     db.query(sqlHaveSemDelete, [name, semIDInt], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -81,7 +78,6 @@ app.post("/api/createCourse", (req, res) => {
     const sqlHaveCourseInsert = "INSERT IGNORE INTO haveCourse (userName, semID, courseName, courseSection) VALUES (?, ?, ?, ?)";
 
     db.query(sqlHaveCourseInsert, [name, semID, courseName, section], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -95,7 +91,6 @@ app.delete("/api/deleteCourse/:userName/:semID/:courseName", (req, res) => {
     const sqlHaveCourseDelete = "DELETE FROM haveCourse WHERE userName = (?) AND semID = (?) AND courseName = (?)";
 
     db.query(sqlHaveCourseDelete, [name, semIDInt, courseName], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -116,7 +111,6 @@ app.post("/api/createTask", (req, res) => {
     const sqlHaveTasksInsert = "INSERT IGNORE INTO haveTasks (userName, semID, courseName, taskName, perToCourse, numSubTasks) VALUES (?, ?, ?, ?, ?, ?)";
 
     db.query(sqlHaveTasksInsert, [name, semID, courseName, taskName, perFloat, numNum], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -131,7 +125,6 @@ app.delete("/api/deleteTask/:userName/:semID/:courseName/:taskName", (req, res) 
     const sqlHaveCourseDelete = "DELETE FROM haveTasks WHERE userName = (?) AND semID = (?) AND courseName = (?) AND taskName=(?)";
 
     db.query(sqlHaveCourseDelete, [name, semIDInt, courseName, taskName], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -148,7 +141,6 @@ app.post("/api/createSubTask", (req, res) => {
     const sqlHaveTasksInsert = "REPLACE INTO haveSubTasks (subTask, userName, semID, courseName, taskName, subGrade, subOutOf) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     db.query(sqlHaveTasksInsert, [subTask, name, semID, courseName, taskName, subGrade, subOutOf], (err, result) => {
-        console.log(result);
         res.send(result);
     });
 })
@@ -177,6 +169,19 @@ app.get("/api/getCourseList/:userName/:semID", (req, res) => {
     })
 })
 
+app.get("/api/getCourseGrade/:userName/:semID/:courseName", (req, res) => {
+    const name = req.params.userName;
+    const semID = req.params.semID;
+    const semIdInt = parseInt(semID);
+    const courseName = req.params.courseName;
+
+    const sqlHaveCourseGet = "SELECT totalCourseGrade FROM haveCourse WHERE userName = (?) AND semID = (?) AND courseName=(?)";
+
+    db.query(sqlHaveCourseGet, [name, semIdInt, courseName], (err, result) => {
+        res.send(result);
+    })
+})
+
 app.get("/api/getTaskList/:userName/:semID/:courseName", (req, res) => {
     const name = req.params.userName;
     const semID = req.params.semID;
@@ -198,7 +203,6 @@ app.get("/api/getSubTask/:userName/:semID/:courseName/:taskName/:subTask", (req,
     const taskName = req.params.taskName;
     const subTask = req.params.subTask;
     const subTaskInt = parseInt(subTask);
-    console.log(name, semIdInt, courseName, taskName, subTaskInt);
 
     const sqlHaveSubGet = "SELECT subGrade, subOutOf  FROM haveSubTasks WHERE userName = (?) AND semID = (?) AND courseName=(?) AND taskName = (?) AND subTask = (?)";
 
@@ -306,7 +310,7 @@ function calSemGrade(courses) {
     return (grade / count).toFixed(3);
 }
 
-app.listen(3001, () => {
+app.listen(4000, () => {
     console.log("running server");
 })
 
