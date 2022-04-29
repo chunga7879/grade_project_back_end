@@ -13,14 +13,6 @@ app.use(express.json());
 // app.use(express.static(path.resolve(__dirname, '../grade/build')));
 app.use(cors());
 
-const db = mysql.createConnection({
-    host: "grade-manage.cwoy4xogjrrq.us-east-1.rds.amazonaws.com",
-    port: "3306",
-    user: "chunga7879",
-    password: "ajdtladl7879",
-    database: "Grade_Management",
-});
-
 db.connect((err) => {
     if(err) {
         console.log("error connection " + err.stack);
