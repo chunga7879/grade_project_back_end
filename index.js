@@ -1,4 +1,3 @@
-
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -12,6 +11,14 @@ app.use(bodyParser.urlencoded( {extended: true} ));
 app.use(express.json());
 // app.use(express.static(path.resolve(__dirname, '../grade/build')));
 app.use(cors());
+
+const db = mysql.createConnection({
+    host: "grade-manage.cwoy4xogjrrq.us-east-1.rds.amazonaws.com",
+    port: "3306",
+    user: "chunga7879",
+    password: "ajdtladl7879",
+    database: "Grade_Management",
+});
 
 db.connect((err) => {
     if(err) {
@@ -110,14 +117,38 @@ app.post("/api/createTask", (req, res) => {
 app.delete("/api/deleteTask/:userName/:semID/:courseName/:taskName", (req, res) => {
     const name = req.params.userName;
     const semID = req.params.semID;
-    const semIDInt = parseInt(semID);
+    const semIdInt = parseInt(semID);
     const courseName = req.params.courseName;
     const taskName = req.params.taskName;
 
     const sqlHaveCourseDelete = "DELETE FROM haveTasks WHERE userName = (?) AND semID = (?) AND courseName = (?) AND taskName=(?)";
 
-    db.query(sqlHaveCourseDelete, [name, semIDInt, courseName, taskName], (err, result) => {
-        res.send(result);
+    db.query(sqlHaveCourseDelete, [name, semIdInt, courseName, taskName], (err, result) => {
+
+        const sqlAllTasks = "SELECT totalTaskGrade, perToCourse  FROM haveTasks WHERE userName = (?) AND semID = (?) AND courseName=(?)"
+
+        db.query(sqlAllTasks, [name, semIdInt, courseName], (err, r3) => {
+
+            let courseGrade = calCourseGrade(r3);
+
+            const sqlUpdateCourseGrade = "UPDATE haveCourse SET totalCourseGrade = (?) WHERE userName = (?) AND semID = (?) AND courseName=(?);";
+
+            db.query(sqlUpdateCourseGrade, [courseGrade, name, semIdInt, courseName], (err, r4) => {
+                const sqlAllCourse = "SELECT totalCourseGrade  FROM haveCourse WHERE userName = (?) AND semID = (?)"
+
+                db.query(sqlAllCourse, [name, semIdInt], (err, r5) => {
+                    let semGrade = calSemGrade(r5);
+                    console.log(semGrade + "r5");
+
+                    const sqlUpdateSemGrade = "UPDATE userHaveSem SET totalSemGrade = (?) WHERE userName = (?) AND semID = (?);";
+
+                    db.query(sqlUpdateSemGrade, [semGrade, name, semIdInt], (err, r6) => {
+                        res.send(r6);
+                    })
+
+                })
+            })
+        })
     });
 })
 
