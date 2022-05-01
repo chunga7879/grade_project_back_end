@@ -15,8 +15,8 @@ app.use(cors());
 const db = mysql.createConnection({
     host: "grade-manage.cwoy4xogjrrq.us-east-1.rds.amazonaws.com",
     port: "3306",
-    user: "chunga7879",
-    password: "ajdtladl7879",
+    user: *,
+    password: *,
     database: "Grade_Management",
 });
 
